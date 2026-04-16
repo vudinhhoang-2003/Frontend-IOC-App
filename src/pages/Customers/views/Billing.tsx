@@ -124,6 +124,9 @@ const PaymentModal: React.FC<{
 // ─── Main Billing ─────────────────────────────────────────────────────────────
 const Billing: React.FC = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [total, setTotal] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
   const [summary, setSummary] = useState<Summary>({ collected: 0, outstanding: 0 });
   const [loading, setLoading] = useState(true);
   const [payInvoice, setPayInvoice] = useState<Invoice | null>(null);
@@ -132,10 +135,12 @@ const Billing: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
+      const skip = (currentPage - 1) * pageSize;
       const [invRes, sumRes] = await Promise.all([
-        apiClient.get('/invoices', { params: { limit: 50 } }),
+        apiClient.get('/invoices', { params: { skip, limit: pageSize } }),
         apiClient.get('/invoices/summary'),
       ]);
+      setTotal(invRes.data.meta?.total || 0);
       setInvoices(
         (invRes.data.data || []).map((i: any) => ({
           uuid: i.id,
@@ -158,7 +163,24 @@ const Billing: React.FC = () => {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [currentPage]);
+
+  const totalPages = Math.ceil(total / pageSize);
+  const startItem = total > 0 ? (currentPage - 1) * pageSize + 1 : 0;
+  const endItem = Math.min(currentPage * pageSize, total);
+
+  const getPages = () => {
+    const pages: (number | '...')[] = [];
+    if (totalPages <= 5) { for (let i = 1; i <= totalPages; i++) pages.push(i); }
+    else {
+      pages.push(1);
+      if (currentPage > 3) pages.push('...');
+      for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) pages.push(i);
+      if (currentPage < totalPages - 2) pages.push('...');
+      pages.push(totalPages);
+    }
+    return pages;
+  };
 
   const handleCancel = async (inv: Invoice) => {
     if (!confirm(`Hủy hóa đơn ${inv.id}?`)) return;
@@ -243,6 +265,23 @@ const Billing: React.FC = () => {
           </tbody>
         </table>
         )}
+      </div>
+
+      {/* Pagination */}
+      <div className="p-4 border-t border-[color:var(--border)] bg-[color:var(--bg-surface)] flex justify-between items-center text-[13px] rounded-b-xl">
+        <div className="text-[color:var(--muted)] font-medium">Hiển thị <strong>{startItem} - {endItem}</strong> / <strong>{total.toLocaleString()}</strong></div>
+        <div className="flex gap-1">
+          <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-[color:var(--border)] hover:bg-[color:var(--bg-hover)] text-[color:var(--muted)] transition-all disabled:opacity-30" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>
+            &lt;
+          </button>
+          {getPages().map((p, idx) => p === '...'
+            ? <button key={`d${idx}`} className="w-8 h-8 flex items-center justify-center rounded-lg border border-[color:var(--border)] text-[color:var(--muted)] opacity-50" disabled>...</button>
+            : <button key={p} className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-all font-bold ${currentPage === p ? 'border-[color:var(--cyan)] bg-[color:var(--cyan)]/10 text-[color:var(--cyan)]' : 'border-[color:var(--border)] hover:bg-[color:var(--bg-hover)] text-[color:var(--muted)]'}`} onClick={() => setCurrentPage(p as number)}>{p}</button>
+          )}
+          <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-[color:var(--border)] hover:bg-[color:var(--bg-hover)] text-[color:var(--muted)] transition-all disabled:opacity-30" disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)}>
+            &gt;
+          </button>
+        </div>
       </div>
 
       <PaymentModal invoice={payInvoice} onClose={() => setPayInvoice(null)} onDone={fetchData} />

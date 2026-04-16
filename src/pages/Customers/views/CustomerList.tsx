@@ -14,6 +14,57 @@ interface Customer {
   email?: string;
 }
 
+
+// ─── Custom Select Component ──────────────────────────────────────────────────
+const CustomSelect: React.FC<{
+  value: string;
+  onChange: (v: string) => void;
+  options: {value: string, label: string}[];
+  className?: string;
+  icon?: React.ReactNode;
+}> = ({ value, onChange, options, className, icon }) => {
+  const [open, setOpen] = useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const fn = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener('mousedown', fn);
+    return () => document.removeEventListener('mousedown', fn);
+  }, []);
+
+  const selectedItem = options.find(o => o.value === value) || options[0];
+
+  return (
+    <div ref={ref} className={`relative ${className || ''}`}>
+      {icon && <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[color:var(--muted)] pointer-events-none z-10">{icon}</div>}
+      <button 
+        type="button"
+        onClick={() => setOpen(!open)}
+        className={`w-full flex items-center justify-between bg-[color:var(--bg-surface)] border ${open ? 'border-[color:var(--cyan)] ring-1 ring-[color:var(--cyan)]/20' : 'border-[color:var(--border)]'} rounded-lg ${icon ? 'pl-8' : 'pl-3'} pr-3 py-2 text-[13px] text-[color:var(--text)] outline-none hover:border-[color:var(--cyan)] transition-all`}
+      >
+        <span className="truncate">{selectedItem.label}</span>
+        <svg className={`shrink-0 ml-2 text-[color:var(--muted)] transition-transform duration-200 ${open ? 'rotate-180' : ''}`} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      
+      {open && (
+        <div className="absolute left-0 right-0 mt-1.5 bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-lg shadow-xl z-50 overflow-hidden text-[13px] animate-fadeInScale transform origin-top-left">
+          <div className="py-1">
+            {options.map(o => (
+              <div 
+                key={o.value} 
+                onClick={() => { onChange(o.value); setOpen(false); }}
+                className={`flex items-center px-3 py-2 cursor-pointer transition-colors ${value === o.value ? 'bg-[color:var(--cyan)]/15 text-[color:var(--cyan)] font-bold' : 'text-[color:var(--text)] hover:bg-[color:var(--bg-hover)]'}`}
+              >
+                {o.label}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ─── Modal: Thêm / Sửa Khách hàng ────────────────────────────────────────────
 const CustomerModal: React.FC<{
   isOpen: boolean;
@@ -101,22 +152,28 @@ const CustomerModal: React.FC<{
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-[11px] font-bold text-[color:var(--muted)] uppercase mb-1 block">Loại KH</label>
-              <select value={form.customer_type} onChange={e => setForm({ ...form, customer_type: e.target.value })}
-                className="w-full bg-[color:var(--bg-surface)] border border-[color:var(--border)] rounded-lg px-3 py-2 text-[13px] text-[color:var(--text)] outline-none focus:border-[color:var(--cyan)]">
-                <option value="household">Hộ dân</option>
-                <option value="enterprise">Doanh nghiệp</option>
-                <option value="government">Cơ quan</option>
-              </select>
+              <CustomSelect 
+                value={form.customer_type} 
+                onChange={v => setForm({ ...form, customer_type: v })}
+                options={[
+                  { value: "household", label: "Hộ dân" },
+                  { value: "enterprise", label: "Doanh nghiệp" },
+                  { value: "government", label: "Cơ quan" }
+                ]}
+              />
             </div>
             {editData && (
               <div>
                 <label className="text-[11px] font-bold text-[color:var(--muted)] uppercase mb-1 block">Trạng thái</label>
-                <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}
-                  className="w-full bg-[color:var(--bg-surface)] border border-[color:var(--border)] rounded-lg px-3 py-2 text-[13px] text-[color:var(--text)] outline-none focus:border-[color:var(--cyan)]">
-                  <option value="active">Đang sử dụng</option>
-                  <option value="suspended">Tạm ngưng</option>
-                  <option value="terminated">Ngưng HĐ</option>
-                </select>
+                <CustomSelect 
+                  value={form.status} 
+                  onChange={v => setForm({ ...form, status: v })}
+                  options={[
+                    { value: "active", label: "Đang sử dụng" },
+                    { value: "suspended", label: "Tạm ngưng" },
+                    { value: "terminated", label: "Ngưng HĐ" }
+                  ]}
+                />
               </div>
             )}
           </div>
@@ -266,17 +323,20 @@ const CustomerList: React.FC = () => {
                 placeholder="Tìm tên, mã KH, SĐT..."
                 className="bg-[color:var(--bg-surface)] border border-[color:var(--border)] rounded-lg pl-8 pr-3 py-1.5 text-[12px] text-[color:var(--text)] outline-none focus:border-[color:var(--cyan)] transition-all w-52" />
             </div>
-            <div className="relative">
-              <Filter className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[color:var(--muted)]" size={12} />
-              <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-                className="bg-[color:var(--bg-surface)] border border-[color:var(--border)] rounded-lg pl-7 pr-2 py-1.5 text-[12px] text-[color:var(--text)] outline-none focus:border-[color:var(--cyan)] appearance-none cursor-pointer">
-                <option value="">Tất cả TT</option>
-                <option value="active">Đang sử dụng</option>
-                <option value="suspended">Tạm ngưng</option>
-                <option value="terminated">Ngưng HĐ</option>
-              </select>
+            <div className="relative w-36">
+              <CustomSelect 
+                value={statusFilter} 
+                onChange={v => { setStatusFilter(v); setCurrentPage(1); }} 
+                icon={<Filter size={13} className="text-[color:var(--muted)]" />}
+                options={[
+                  { value: "", label: "Tất cả TT" },
+                  { value: "active", label: "Đang sử dụng" },
+                  { value: "suspended", label: "Tạm ngưng" },
+                  { value: "terminated", label: "Ngưng HĐ" },
+                ]}
+              />
             </div>
-            <button className="btn btn-ghost btn-sm flex items-center gap-1.5 text-[color:var(--muted)] hover:text-[color:var(--text)]"><Download size={14} /> Export</button>
+            <button onClick={() => alert('Chức năng Export Excel/CSV đang được cấu hình!')} className="btn btn-ghost btn-sm flex items-center gap-1.5 text-[color:var(--muted)] hover:text-[color:var(--text)]"><Download size={14} /> Export</button>
           </div>
         </div>
 

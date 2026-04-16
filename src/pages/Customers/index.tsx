@@ -41,10 +41,10 @@ const CustomersPage: React.FC = () => {
           </p>
         </div>
         <div className="page-actions flex gap-2.5">
-          <button className="btn btn-ghost btn-sm flex items-center gap-1.5 text-[color:var(--muted)] hover:text-[color:var(--text)]">
+          <button onClick={() => alert('Chức năng Import file đang được cấu hình!')} className="btn btn-ghost btn-sm flex items-center gap-1.5 text-[color:var(--muted)] hover:text-[color:var(--text)]">
             <Download size={14} /> Import File
           </button>
-          <button className="btn btn-ghost btn-sm flex items-center gap-1.5 text-[color:var(--muted)] hover:text-[color:var(--text)]">
+          <button onClick={() => alert('Đang xuất Template...') } className="btn btn-ghost btn-sm flex items-center gap-1.5 text-[color:var(--muted)] hover:text-[color:var(--text)]">
             <FileSpreadsheet size={14} /> Template
           </button>
           <button onClick={handleAddCustomer}

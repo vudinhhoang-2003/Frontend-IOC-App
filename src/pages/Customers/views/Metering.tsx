@@ -103,12 +103,14 @@ const CreateReadingModal: React.FC<{ isOpen: boolean; onClose: () => void; onDon
 
 // ─── Main Metering ────────────────────────────────────────────────────────────
 const Metering: React.FC = () => {
-  const [readings, setReadings] = useState<Reading[]>([]);
   const [allReadings, setAllReadings] = useState<Reading[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   const fetchReadings = async () => {
     setLoading(true);
@@ -128,20 +130,42 @@ const Metering: React.FC = () => {
         status: r.status || 'pending',
       }));
       setAllReadings(mapped);
-      setReadings(mapped);
     } catch (err) { console.error('Failed to fetch:', err); }
     finally { setLoading(false); }
   };
 
   useEffect(() => { fetchReadings(); }, []);
 
-  useEffect(() => {
-    if (!searchQuery.trim()) { setReadings(allReadings); }
+  // Compute filtered and paginated results
+  const filteredReadings = searchQuery.trim()
+    ? allReadings.filter(r => {
+        const q = searchQuery.toLowerCase();
+        return r.id.toLowerCase().includes(q) || r.name.toLowerCase().includes(q) || r.meter.toLowerCase().includes(q);
+      })
+    : allReadings;
+
+  const total = filteredReadings.length;
+  const totalPages = Math.ceil(total / pageSize);
+  const startItem = total > 0 ? (currentPage - 1) * pageSize + 1 : 0;
+  const endItem = Math.min(currentPage * pageSize, total);
+  
+  const readings = filteredReadings.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  // Reset to page 1 on search
+  useEffect(() => { setCurrentPage(1); }, [searchQuery]);
+
+  const getPages = () => {
+    const pages: (number | '...')[] = [];
+    if (totalPages <= 5) { for (let i = 1; i <= totalPages; i++) pages.push(i); }
     else {
-      const q = searchQuery.toLowerCase();
-      setReadings(allReadings.filter(r => r.id.toLowerCase().includes(q) || r.name.toLowerCase().includes(q) || r.meter.toLowerCase().includes(q)));
+      pages.push(1);
+      if (currentPage > 3) pages.push('...');
+      for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) pages.push(i);
+      if (currentPage < totalPages - 2) pages.push('...');
+      pages.push(totalPages);
     }
-  }, [searchQuery, allReadings]);
+    return pages;
+  };
 
   const updateStatus = async (dbId: number, newStatus: string) => {
     setUpdatingId(dbId);
@@ -235,6 +259,23 @@ const Metering: React.FC = () => {
           </tbody>
         </table>
         )}
+      </div>
+
+      {/* Pagination */}
+      <div className="p-4 border-t border-[color:var(--border)] bg-[color:var(--bg-surface)] flex justify-between items-center text-[13px] rounded-b-xl">
+        <div className="text-[color:var(--muted)] font-medium">Hiển thị <strong>{startItem} - {endItem}</strong> / <strong>{total.toLocaleString()}</strong></div>
+        <div className="flex gap-1">
+          <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-[color:var(--border)] hover:bg-[color:var(--bg-hover)] text-[color:var(--muted)] transition-all disabled:opacity-30" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>
+            &lt;
+          </button>
+          {getPages().map((p, idx) => p === '...'
+            ? <button key={`d${idx}`} className="w-8 h-8 flex items-center justify-center rounded-lg border border-[color:var(--border)] text-[color:var(--muted)] opacity-50" disabled>...</button>
+            : <button key={p} className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-all font-bold ${currentPage === p ? 'border-[color:var(--cyan)] bg-[color:var(--cyan)]/10 text-[color:var(--cyan)]' : 'border-[color:var(--border)] hover:bg-[color:var(--bg-hover)] text-[color:var(--muted)]'}`} onClick={() => setCurrentPage(p as number)}>{p}</button>
+          )}
+          <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-[color:var(--border)] hover:bg-[color:var(--bg-hover)] text-[color:var(--muted)] transition-all disabled:opacity-30" disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)}>
+            &gt;
+          </button>
+        </div>
       </div>
 
       <CreateReadingModal isOpen={showCreate} onClose={() => setShowCreate(false)} onDone={fetchReadings} />
