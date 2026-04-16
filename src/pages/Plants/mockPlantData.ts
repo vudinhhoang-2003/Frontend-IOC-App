@@ -1,0 +1,13 @@
+import type { Plant } from './types';
+
+export const MOCK_PLANTS: Plant[] = [
+  { id: 1, name: 'Nhà máy Hồng Gai', location: 'TP. Hạ Long', address: 'Số 1, Lê Thánh Tông, Hồng Gai', lat: 20.9595, lng: 107.0700, capacity: 30000, output: 27500, status: 'active', manager: 'Nguyễn Văn Hùng', established: '1985', powerUsage: 0.38, chemicalCost: 1250, compliance: 99.8, loss: 4.2 },
+  { id: 2, name: 'Nhà máy Bãi Cháy', location: 'TP. Hạ Long', address: 'Đường Hạ Long, P. Bãi Cháy', lat: 20.9487, lng: 107.0432, capacity: 20000, output: 18200, status: 'active', manager: 'Trần Thị Lan', established: '1994', powerUsage: 0.42, chemicalCost: 1320, compliance: 99.5, loss: 5.1 },
+  { id: 3, name: 'Nhà máy Cẩm Phả', location: 'TP. Cẩm Phả', address: 'Km 12, P. Quang Hanh, TP. Cẩm Phả', lat: 21.0055, lng: 107.2740, capacity: 15000, output: 13800, status: 'active', manager: 'Lê Đình Mạnh', established: '1992', powerUsage: 0.45, chemicalCost: 1280, compliance: 98.2, loss: 6.8 },
+  { id: 4, name: 'Nhà máy Uông Bí', location: 'TP. Uông Bí', address: 'Phường Trưng Vương, TP. Uông Bí', lat: 21.0338, lng: 106.7733, capacity: 10000, output: 9200, status: 'warning', manager: 'Phạm Xuân Định', established: '1998', powerUsage: 0.48, chemicalCost: 1450, compliance: 97.5, loss: 8.5 },
+  { id: 5, name: 'Nhà máy Móng Cái', location: 'TP. Móng Cái', address: 'P. Ka Long, TP. Móng Cái', lat: 21.5240, lng: 107.9640, capacity: 8000, output: 7100, status: 'active', manager: 'Hoàng Văn Tú', established: '2005', powerUsage: 0.41, chemicalCost: 1200, compliance: 99.9, loss: 3.8 },
+  { id: 6, name: 'Trạm Vân Đồn', location: 'H. Vân Đồn', address: 'Xã Đông Xá, H. Vân Đồn', lat: 21.0500, lng: 107.4000, capacity: 5000, output: 4300, status: 'active', manager: 'Đỗ Thị Mai', established: '2011', powerUsage: 0.52, chemicalCost: 1550, compliance: 99.0, loss: 7.2 },
+  { id: 7, name: 'Nhà máy Tiên Yên', location: 'H. Tiên Yên', address: 'Thị trấn Tiên Yên, H. Tiên Yên', lat: 21.3230, lng: 107.4040, capacity: 4000, output: 3800, status: 'active', manager: 'Trần Văn Bình', established: '2015', powerUsage: 0.44, chemicalCost: 1290, compliance: 99.2, loss: 4.5 },
+  { id: 8, name: 'Trạm bơm Hải Hà', location: 'H. Hải Hà', address: 'KCN Cảng biển Hải Hà', lat: 21.4830, lng: 107.7500, capacity: 12000, output: 11000, status: 'active', manager: 'Lê Hồng Anh', established: '2018', powerUsage: 0.39, chemicalCost: 1150, compliance: 99.7, loss: 3.2 },
+  { id: 9, name: 'Nhà máy Đầm Hà', location: 'H. Đầm Hà', address: 'Thị trấn Đầm Hà, H. Đầm Hà', lat: 21.3800, lng: 107.5700, capacity: 3500, output: 1200, status: 'fault', manager: 'Vũ Minh Đức', established: '2016', powerUsage: 0.65, chemicalCost: 1800, compliance: 95.0, loss: 12.5 },
+];

@@ -1,0 +1,119 @@
+{
+  "common": {
+    "login": "Login",
+    "logout": "Logout",
+    "settings": "Settings",
+    "search": "Search...",
+    "theme": {
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "language": {
+      "vi": "Tiếng Việt",
+      "en": "English"
+    },
+    "sidebar": {
+      "collapse": "Collapse",
+      "expand": "Expand"
+    },
+    "weather": {
+      "humidity": "Humidity",
+      "wind": "Wind"
+    },
+    "status": {
+      "online": "Online",
+      "offline": "Offline"
+    }
+  },
+  "menu": {
+    "categories": {
+      "central_command": "Central Command",
+      "production": "Production Management",
+      "technical": "Technical & Network",
+      "business": "Business Management",
+      "ai_center": "AI Center",
+      "resources_system": "Resources & System"
+    },
+    "items": {
+      "dashboard": "Dashboard",
+      "approve": "Operational & Approval",
+      "videowall": "Video Wall",
+      "gis": "GIS Map",
+      "camera": "CCTV Camera",
+      "callcenter": "CSKH Hotline",
+      "scada": "SCADA Monitoring",
+      "plants": "Plant Management",
+      "quality": "Water Quality",
+      "lab": "Laboratory",
+      "pumpscale": "Pumping Schedule",
+      "alertconfig": "Alert Configuration",
+      "nrw": "NRW - Water Loss",
+      "incidents": "Incidents & Work Orders",
+      "inventory": "Materials & Equipment",
+      "business_overview": "Business Overview",
+      "customers": "Customers & Contracts",
+      "reports": "Reports & Analytics",
+      "ai_agent": "AI Agent",
+      "ai_assistant": "AI Assistant",
+      "data_hub": "Data Hub",
+      "hrm": "Human Resources",
+      "history": "Change History",
+      "system_settings": "System Settings"
+    }
+  },
+  "login": {
+    "title": "QUAWACO IOC",
+    "subtitle": "Intelligent Operations Center",
+    "username": "Username",
+    "password": "Password",
+    "remember": "Remember me",
+    "forgot": "Forgot password?",
+    "button": "LOGIN TO SYSTEM",
+    "error": "Incorrect username or password"
+  },
+  "dashboard": {
+    "title": "System Overview",
+    "subtitle": "Real-time data from 12 plants and stations",
+    "system_stable": "System Stable",
+    "realtime_chart": "Real-time Production Chart",
+    "latest_alerts": "Latest Alerts",
+    "view_all": "View all alerts",
+    "stats": {
+      "production": "Total Production",
+      "consumption": "Total Consumption",
+      "nrw": "Water Loss Rate (NRW)",
+      "incidents": "Active Incidents",
+      "online_status": "Online Stations / Total",
+      "alerts_pending": "Pending Alerts",
+      "customers": "Total Customers",
+      "avg_nrw": "Average NRW Rate"
+    },
+    "filters": {
+      "search_placeholder": "Find stations, plants, incidents...",
+      "plant": "Plant",
+      "area": "Area",
+      "time": "Time",
+      "all": "All",
+      "today": "Today",
+      "seven_days": "7 Days",
+      "month": "Month",
+      "reset": "Reset"
+    },
+    "chart_labels": {
+      "hourly_prod": "Hourly Production",
+      "total_prod": "Total Production",
+      "usage_capacity": "Plants & Capacity Usage",
+      "typical_week": "Typical Week"
+    }
+  },
+  "stations": {
+    "hong_gai": "Hong Gai",
+    "bai_chay": "Bai Chay",
+    "cam_pha": "Cam Pha",
+    "uong_bi": "Uong Bi",
+    "mong_cai": "Mong Cai",
+    "van_don": "Van Don",
+    "hoanh_bo": "Hoanh Bo",
+    "quang_yen": "Quang Yen"
+  }
+}

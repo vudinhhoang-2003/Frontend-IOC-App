@@ -1,0 +1,119 @@
+{
+  "common": {
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất",
+    "settings": "Cài đặt",
+    "search": "Tìm kiếm...",
+    "theme": {
+      "light": "Sáng",
+      "dark": "Tối"
+    },
+    "language": {
+      "vi": "Tiếng Việt",
+      "en": "English"
+    },
+    "sidebar": {
+      "collapse": "Thu hẹp",
+      "expand": "Mở rộng"
+    },
+    "weather": {
+      "humidity": "Độ ẩm",
+      "wind": "Gió"
+    },
+    "status": {
+      "online": "Trực tuyến",
+      "offline": "Ngoại tuyến"
+    }
+  },
+  "menu": {
+    "categories": {
+      "central_command": "Điều hành Tập trung",
+      "production": "Quản lý Sản xuất",
+      "technical": "Kỹ thuật & Mạng lưới",
+      "business": "Quản lý Kinh doanh",
+      "ai_center": "Trung tâm AI",
+      "resources_system": "Nguồn lực & Hệ thống"
+    },
+    "items": {
+      "dashboard": "Dashboard",
+      "approve": "Điều hành & Phê duyệt",
+      "videowall": "Video Wall",
+      "gis": "Bản đồ GIS",
+      "camera": "Camera CCTV",
+      "callcenter": "Tổng đài CSKH",
+      "scada": "Giám sát SCADA",
+      "plants": "Quản lý Nhà máy",
+      "quality": "Chất lượng nước",
+      "lab": "Phòng thí nghiệm",
+      "pumpscale": "Lịch Bơm",
+      "alertconfig": "Thiết lập cảnh báo",
+      "nrw": "NRW - Thất thoát",
+      "incidents": "Sự cố & Lệnh CT",
+      "inventory": "Vật tư & Thiết bị",
+      "business_overview": "Tổng quan kinh doanh",
+      "customers": "Khách hàng & HĐ",
+      "reports": "Báo cáo & Phân tích",
+      "ai_agent": "AI Agent",
+      "ai_assistant": "AI Trợ lý",
+      "data_hub": "Data Hub",
+      "hrm": "Nhân sự",
+      "history": "Lịch sử thay đổi",
+      "system_settings": "Cài đặt hệ thống"
+    }
+  },
+  "login": {
+    "title": "QUAWACO IOC",
+    "subtitle": "Trung tâm Điều hành Thông minh",
+    "username": "Tên đăng nhập",
+    "password": "Mật khẩu",
+    "remember": "Ghi nhớ đăng nhập",
+    "forgot": "Quên mật khẩu?",
+    "button": "ĐĂNG NHẬP HỆ THỐNG",
+    "error": "Tên đăng nhập hoặc mật khẩu không đúng"
+  },
+  "dashboard": {
+    "title": "Tổng quan Hệ thống",
+    "subtitle": "Dữ liệu thời gian thực từ 12 nhà máy và trạm bơm",
+    "system_stable": "Hệ thống ổn định",
+    "realtime_chart": "Biểu đồ Sản xuất thời gian thực",
+    "latest_alerts": "Cảnh báo mới nhất",
+    "view_all": "Xem tất cả cảnh báo",
+    "stats": {
+      "production": "Tổng Lưu lượng Sản xuất",
+      "consumption": "Lưu lượng Tiêu thụ",
+      "nrw": "Tỷ lệ Thất thoát (NRW)",
+      "incidents": "Sự cố đang xử lý",
+      "online_status": "Trạm Online / Tổng",
+      "alerts_pending": "Cảnh báo chưa xử lý",
+      "customers": "Tổng khách hàng",
+      "avg_nrw": "Tỷ lệ NRW trung bình"
+    },
+    "filters": {
+      "search_placeholder": "Tìm trạm, nhà máy, sự cố...",
+      "plant": "Nhà máy",
+      "area": "Khu vực",
+      "time": "Thời gian",
+      "all": "Tất cả",
+      "today": "Hôm nay",
+      "seven_days": "7 ngày",
+      "month": "Tháng",
+      "reset": "Đặt lại"
+    },
+    "chart_labels": {
+      "hourly_prod": "Sản lượng theo giờ",
+      "total_prod": "Tổng sản lượng",
+      "usage_capacity": "Nhà máy & Công suất sử dụng",
+      "typical_week": "Tuần điển hình"
+    }
+  },
+  "stations": {
+    "hong_gai": "Hồng Gai",
+    "bai_chay": "Bãi Cháy",
+    "cam_pha": "Cẩm Phả",
+    "uong_bi": "Uông Bí",
+    "mong_cai": "Móng Cái",
+    "van_don": "Vân Đồn",
+    "hoanh_bo": "Hoành Bồ",
+    "quang_yen": "Quảng Yên"
+  }
+}

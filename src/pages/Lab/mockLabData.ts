@@ -1,0 +1,127 @@
+import type { LimsData } from './types';
+
+export const LIMS_DATA: LimsData = {
+  limits: {
+    pH: { min: 6.5, max: 8.5, unit: '' },
+    turbidity: { min: 0, max: 2, unit: 'NTU' },
+    chlorine: { min: 0.2, max: 1.0, unit: 'mg/l' },
+    coliform: { min: 0, max: 0, unit: 'CFU/100ml' },
+    arsenic: { min: 0, max: 0.01, unit: 'mg/l' },
+    nitrate: { min: 0, max: 50, unit: 'mg/l' },
+    conductivity: { min: 0, max: 1500, unit: 'µS/cm' },
+    hardness: { min: 0, max: 350, unit: 'mg/l' },
+  },
+
+  sites: [
+    { id: 'NM-01-IN', name: 'NM Hạ Long 1 – Đầu vào', lat: 20.952, lng: 107.085, zone: 'PLANT' },
+    { id: 'NM-01-OUT', name: 'NM Hạ Long 1 – Đầu ra', lat: 20.953, lng: 107.086, zone: 'PLANT' },
+    { id: 'NM-02-IN', name: 'NM Hạ Long 2 – Đầu vào', lat: 20.897, lng: 107.052, zone: 'PLANT' },
+    { id: 'NM-02-OUT', name: 'NM Hạ Long 2 – Đầu ra', lat: 20.898, lng: 107.053, zone: 'PLANT' },
+    { id: 'NM-03-IN', name: 'NM Uông Bí – Đầu vào', lat: 21.035, lng: 106.773, zone: 'PLANT' },
+    { id: 'NM-03-OUT', name: 'NM Uông Bí – Đầu ra', lat: 21.036, lng: 106.774, zone: 'PLANT' },
+  ],
+
+  samples: [
+    { id: 'SM-2026031101', siteId: 'NM-01-OUT', siteName: 'NM Hạ Long 1 – Đầu ra', time: '2026-03-01 08:00', collector: 'Nguyễn Văn An', status: 'alert', results: { pH: 7.2, turbidity: 0.8, chlorine: 0.1, coliform: 0, arsenic: 0.005, nitrate: 12, conductivity: 480, hardness: 185 } },
+    { id: 'SM-2026031102', siteId: 'NM-01-IN', siteName: 'NM Hạ Long 1 – Đầu vào', time: '2026-03-01 08:15', collector: 'Trần Thị Bình', status: 'ok', results: { pH: 7.0, turbidity: 2.8, chlorine: 0.0, coliform: 2, arsenic: 0.006, nitrate: 22, conductivity: 600, hardness: 220 } },
+    { id: 'SM-2026031103', siteId: 'NM-02-OUT', siteName: 'NM Hạ Long 2 – Đầu ra', time: '2026-03-01 09:00', collector: 'Lê Minh Cường', status: 'ok', results: { pH: 7.4, turbidity: 0.5, chlorine: 0.55, coliform: 0, arsenic: 0.003, nitrate: 9, conductivity: 430, hardness: 165 } },
+    { id: 'SM-2026031104', siteId: 'NM-02-IN', siteName: 'NM Hạ Long 2 – Đầu vào', time: '2026-03-01 09:20', collector: 'Phạm Quốc Hùng', status: 'pending', results: null },
+    { id: 'SM-2026031105', siteId: 'NM-03-OUT', siteName: 'NM Uông Bí – Đầu ra', time: '2026-03-01 10:30', collector: 'Hoàng Thi Mai', status: 'ok', results: { pH: 7.3, turbidity: 0.6, chlorine: 0.48, coliform: 0, arsenic: 0.004, nitrate: 14, conductivity: 460, hardness: 178 } },
+    { id: 'SM-2026030901', siteId: 'NM-01-OUT', siteName: 'NM Hạ Long 1 – Đầu ra', time: '2026-02-28 08:00', collector: 'Nguyễn Văn An', status: 'ok', results: { pH: 7.3, turbidity: 0.7, chlorine: 0.52, coliform: 0, arsenic: 0.004, nitrate: 11, conductivity: 455, hardness: 172 } },
+    { id: 'SM-2026030902', siteId: 'NM-01-IN', siteName: 'NM Hạ Long 1 – Đầu vào', time: '2026-02-28 08:30', collector: 'Nguyễn Văn An', status: 'ok', results: { pH: 7.1, turbidity: 1.5, chlorine: 0.0, coliform: 1, arsenic: 0.005, nitrate: 15, conductivity: 490, hardness: 190 } },
+    { id: 'SM-2026030903', siteId: 'NM-02-OUT', siteName: 'NM Hạ Long 2 – Đầu ra', time: '2026-02-28 09:00', collector: 'Trần Thị Bình', status: 'ok', results: { pH: 7.2, turbidity: 0.6, chlorine: 0.5, coliform: 0, arsenic: 0.004, nitrate: 10, conductivity: 440, hardness: 170 } },
+    { id: 'SM-2026030904', siteId: 'NM-03-OUT', siteName: 'NM Uông Bí – Đầu ra', time: '2026-02-28 10:00', collector: 'Lê Minh Cường', status: 'ok', results: { pH: 7.4, turbidity: 0.5, chlorine: 0.45, coliform: 0, arsenic: 0.003, nitrate: 12, conductivity: 450, hardness: 175 } },
+    { id: 'SM-2026030801', siteId: 'NM-01-OUT', siteName: 'NM Hạ Long 1 – Đầu ra', time: '2026-02-27 08:00', collector: 'Phạm Quốc Hùng', status: 'ok', results: { pH: 7.3, turbidity: 0.7, chlorine: 0.6, coliform: 0, arsenic: 0.004, nitrate: 11, conductivity: 460, hardness: 180 } },
+    { id: 'SM-2026030802', siteId: 'NM-02-OUT', siteName: 'NM Hạ Long 2 – Đầu ra', time: '2026-02-27 09:00', collector: 'Hoàng Thi Mai', status: 'ok', results: { pH: 7.2, turbidity: 0.5, chlorine: 0.55, coliform: 0, arsenic: 0.003, nitrate: 9, conductivity: 440, hardness: 170 } },
+    { id: 'SM-2026030701', siteId: 'NM-01-OUT', siteName: 'NM Hạ Long 1 – Đầu ra', time: '2026-02-26 08:00', collector: 'Nguyễn Văn An', status: 'ok', results: { pH: 7.3, turbidity: 0.6, chlorine: 0.58, coliform: 0, arsenic: 0.004, nitrate: 11, conductivity: 450, hardness: 175 } },
+    { id: 'SM-2026030702', siteId: 'NM-03-OUT', siteName: 'NM Uông Bí – Đầu ra', time: '2026-02-26 10:00', collector: 'Trần Thị Bình', status: 'ok', results: { pH: 7.4, turbidity: 0.6, chlorine: 0.48, coliform: 0, arsenic: 0.003, nitrate: 12, conductivity: 460, hardness: 180 } },
+    { id: 'SM-2026030601', siteId: 'NM-01-OUT', siteName: 'NM Hạ Long 1 – Đầu ra', time: '2026-02-25 08:00', collector: 'Lê Minh Cường', status: 'ok', results: { pH: 7.2, turbidity: 0.8, chlorine: 0.52, coliform: 0, arsenic: 0.005, nitrate: 13, conductivity: 470, hardness: 185 } },
+    { id: 'SM-2026030602', siteId: 'NM-02-OUT', siteName: 'NM Hạ Long 2 – Đầu ra', time: '2026-02-25 09:00', collector: 'Phạm Quốc Hùng', status: 'ok', results: { pH: 7.3, turbidity: 0.5, chlorine: 0.55, coliform: 0, arsenic: 0.004, nitrate: 10, conductivity: 445, hardness: 172 } },
+    { id: 'SM-2026030501', siteId: 'NM-01-OUT', siteName: 'NM Hạ Long 1 – Đầu ra', time: '2026-02-24 08:00', collector: 'Hoàng Thi Mai', status: 'ok', results: { pH: 7.3, turbidity: 0.9, chlorine: 0.5, coliform: 0, arsenic: 0.005, nitrate: 14, conductivity: 485, hardness: 190 } },
+    { id: 'SM-2026030502', siteId: 'NM-03-OUT', siteName: 'NM Uông Bí – Đầu ra', time: '2026-02-24 10:00', collector: 'Nguyễn Văn An', status: 'ok', results: { pH: 7.4, turbidity: 0.6, chlorine: 0.46, coliform: 0, arsenic: 0.004, nitrate: 12, conductivity: 465, hardness: 182 } },
+    { id: 'SM-2026030401', siteId: 'NM-01-OUT', siteName: 'NM Hạ Long 1 – Đầu ra', time: '2026-02-23 08:00', collector: 'Trần Thị Bình', status: 'ok', results: { pH: 7.2, turbidity: 0.7, chlorine: 0.58, coliform: 0, arsenic: 0.004, nitrate: 11, conductivity: 450, hardness: 175 } },
+    { id: 'SM-2026030402', siteId: 'NM-02-OUT', siteName: 'NM Hạ Long 2 – Đầu ra', time: '2026-02-23 09:00', collector: 'Lê Minh Cường', status: 'ok', results: { pH: 7.3, turbidity: 0.4, chlorine: 0.62, coliform: 0, arsenic: 0.003, nitrate: 8, conductivity: 420, hardness: 165 } },
+    { id: 'SM-2026030301', siteId: 'NM-01-OUT', siteName: 'NM Hạ Long 1 – Đầu ra', time: '2026-02-22 08:00', collector: 'Phạm Quốc Hùng', status: 'ok', results: { pH: 7.3, turbidity: 0.8, chlorine: 0.55, coliform: 0, arsenic: 0.004, nitrate: 12, conductivity: 470, hardness: 180 } },
+  ],
+
+  calibrations: [
+    { id: 'CAL-001', equipment: 'Máy đo pH (Orion 5-Star)', lastDate: '2025-12-10', nextDate: '2026-06-10', agency: 'VMI – Viện Đo lường', status: 'ok', cert: 'VMI-2025-1234' },
+    { id: 'CAL-002', equipment: 'Máy đo độ đục (HACH 2100Q)', lastDate: '2025-11-15', nextDate: '2026-05-15', agency: 'Sở KH&CN Quảng Ninh', status: 'warning', cert: 'SQN-2025-887' },
+    { id: 'CAL-003', equipment: 'Máy phân tích Clo dư', lastDate: '2026-01-20', nextDate: '2026-07-20', agency: 'Viện Vệ sinh Dịch tễ', status: 'ok', cert: 'VVDT-2026-021' },
+    { id: 'CAL-004', equipment: 'ICP-MS (phân tích kim loại)', lastDate: '2025-09-05', nextDate: '2026-03-05', agency: 'Quatest 1', status: 'overdue', cert: 'Q1-2025-456' },
+    { id: 'CAL-005', equipment: 'Tủ cấy vi sinh', lastDate: '2026-02-01', nextDate: '2026-08-01', agency: 'CDC Quảng Ninh', status: 'ok', cert: 'CDC-2026-099' },
+    { id: 'CAL-006', equipment: 'Máy đo nồng độ Nitrat', lastDate: '2025-10-12', nextDate: '2026-04-12', agency: 'Quatest 1', status: 'ok', cert: 'Q1-2025-667' },
+    { id: 'CAL-007', equipment: 'Máy đo độ dẫn điện', lastDate: '2025-08-20', nextDate: '2026-02-20', agency: 'VMI', status: 'warning', cert: 'VMI-2025-998' },
+    { id: 'CAL-008', equipment: 'Bể ổn nhiệt PTN', lastDate: '2026-01-05', nextDate: '2027-01-05', agency: 'Sở KH&CN', status: 'ok', cert: 'SQN-2026-012' },
+    { id: 'CAL-009', equipment: 'Cân phân tích điện tử', lastDate: '2025-12-15', nextDate: '2026-12-15', agency: 'VMI', status: 'ok', cert: 'VMI-2025-004' },
+    { id: 'CAL-010', equipment: 'Máy ly tâm cao tốc', lastDate: '2025-07-10', nextDate: '2026-07-10', agency: 'Trung tâm Thiết bị', status: 'ok', cert: 'TB-2025-554' },
+    { id: 'CAL-011', equipment: 'Máy quang phổ UV-VIS', lastDate: '2025-06-20', nextDate: '2026-06-20', agency: 'Quatest 1', status: 'ok', cert: 'Q1-2025-112' },
+    { id: 'CAL-012', equipment: 'Máy đo Oxy hòa tan (DO)', lastDate: '2026-02-15', nextDate: '2026-08-15', agency: 'CDC Quảng Ninh', status: 'ok', cert: 'CDC-2026-443' },
+    { id: 'CAL-013', equipment: 'Bộ chưng cất Kjeldahl', lastDate: '2025-09-30', nextDate: '2026-09-30', agency: 'VMI', status: 'ok', cert: 'VMI-2025-789' },
+    { id: 'CAL-014', equipment: 'Máy đo nhu cầu Oxy (BOD)', lastDate: '2025-08-11', nextDate: '2026-02-11', agency: 'Sở Y tế', status: 'warning', cert: 'SYT-2025-332' },
+    { id: 'CAL-015', equipment: 'Kính hiển vi điện tử', lastDate: '2025-05-05', nextDate: '2026-05-05', agency: 'Quatest 1', status: 'ok', cert: 'Q1-2025-001' },
+  ],
+
+  trends: {
+    dates: ['24/02', '25/02', '26/02', '27/02', '28/02', '01/03'],
+    turbidity: [0.6, 0.7, 0.9, 1.1, 0.8, 0.8],
+    chlorine: [0.55, 0.50, 0.45, 0.40, 0.42, 0.10],
+    pH: [7.3, 7.2, 7.4, 7.3, 7.3, 7.2],
+  },
+
+  aiRecommendations: [
+    {
+      level: 'critical',
+      title: 'Tối ưu hóa Clo dư đầu ra NM Hạ Long 1',
+      detail: 'Độ đục đầu vào tăng (2.8 NTU) kèm nhu cầu xử lý vi sinh cao. Mô hình AI nhận thấy Clo dư hiện tại 0.1 mg/l có nguy cơ tái nhiễm.',
+      action: 'AI gợi ý: Tăng liều lượng Clo lỏng từ 1.2kg/h lên 1.5kg/h. Tần suất thí nghiệm kiểm chứng: 30 phút/lần trong 4h tới.',
+      input: 'Turb: 2.8, pH: 7.0',
+      dosing: 'PAC: 15ppm, Clo: 1.5kg/h',
+      predictedOutput: 'Clo dư: 0.55 mg/l, Coliform: 0',
+      savings: 'Giảm 5% Clo so với phương pháp thử/sai truyền thống',
+      date: '2026-03-01 08:15', site: 'NM-01'
+    },
+    {
+      level: 'warning',
+      title: 'Điều chỉnh keo tụ PAC tại NM Hạ Long 2',
+      detail: 'Độ đục đầu vào ổn định nhưng thời gian lắng chậm hơn bình thường. Cần điều chỉnh để tránh lãng phí hóa chất PAC.',
+      action: 'AI gợi ý: Giảm liều lượng PAC xuống 12ppm thay vì 15ppm. Kéo dài thời gian khuấy chậm thêm 2 phút.',
+      input: 'Turb: 0.8, pH: 7.4',
+      dosing: 'PAC: 12ppm (-3ppm)',
+      predictedOutput: 'Turbidity: 0.4 NTU',
+      savings: 'Tiết kiệm 20kg PAC/ngày',
+      date: '2026-03-01 09:00', site: 'NM-02'
+    },
+    {
+      level: 'info',
+      title: 'Phân tích hiệu quả hóa chất NM Uông Bí',
+      detail: 'Dữ liệu vận hành tháng 2 cho thấy tiềm năng tối ưu hóa pH đầu vào để tăng hiệu quả keo tụ.',
+      action: 'AI gợi ý: Duy trì pH đầu vào ở mức 7.2 bằng vôi bột để tối ưu hóa hiệu quả PAC. Tăng độ tin cậy kết quả lên 92%.',
+      input: 'pH: 7.4 -> AI đề xuất 7.2',
+      dosing: 'Vôi: +2kg/h, PAC: -2ppm',
+      predictedOutput: 'Chất lượng ổn định hơn, giảm cặn lơ lửng',
+      savings: 'Tối ưu hóa quy trình xử lý 10%',
+      date: '2026-03-01 10:30', site: 'NM-03'
+    },
+  ],
+  waterInspections: {
+    history: [
+      { id: 'WI-2026-003', plant: 'NM Hạ Long 1', agency: 'Sở Y tế Quảng Ninh', date: '2026-02-20', result: 'pass', numSamples: 15, numFail: 0, report: 'BKD-HL1-2026-02', note: 'Kiểm định đột xuất – Đạt QCVN' },
+      { id: 'WI-2026-002', plant: 'NM Hạ Long 2', agency: 'Trung tâm Y tế dự phòng Tỉnh', date: '2026-01-21', result: 'pass', numSamples: 10, numFail: 0, report: 'BKD-HL2-2026-01', note: '' },
+      { id: 'WI-2026-001', plant: 'NM Hạ Long 1', agency: 'Trung tâm Y tế dự phòng Tỉnh', date: '2026-01-20', result: 'pass', numSamples: 12, numFail: 0, report: 'BKD-HL1-2026-01', note: '' },
+      { id: 'WI-2025-004', plant: 'NM Uông Bí', agency: 'Sở Y tế Quảng Ninh', date: '2025-10-05', result: 'pass', numSamples: 10, numFail: 0, report: 'BKD-UB-2025-10', note: 'Tái kiểm sau sự cố tháng 9 – đạt yêu cầu.' },
+      { id: 'WI-2025-003', plant: 'NM Uông Bí', agency: 'Sở Y tế Quảng Ninh', date: '2025-09-10', result: 'fail', numSamples: 10, numFail: 2, report: 'BKD-UB-2025-09', note: 'Clô dư và Coliform không đạt 2 mẫu cuối nguồn.' },
+      { id: 'WI-2025-002', plant: 'NM Hạ Long 2', agency: 'Trung tâm Y tế dự phòng Tỉnh', date: '2025-08-16', result: 'pass', numSamples: 10, numFail: 0, report: 'BKD-HL2-2025-08', note: '' },
+      { id: 'WI-2025-001', plant: 'NM Hạ Long 1', agency: 'Trung tâm Y tế dự phòng Tỉnh', date: '2025-08-15', result: 'pass', numSamples: 12, numFail: 0, report: 'BKD-HL1-2025-08', note: '' },
+      { id: 'WI-2025-OLD-1', plant: 'NM Hạ Long 1', agency: 'Sở Y tế', date: '2025-06-10', result: 'pass', numSamples: 10, numFail: 0, report: 'R06', note: '' },
+      { id: 'WI-2025-OLD-2', plant: 'NM Hạ Long 2', agency: 'Trung tâm Y tế', date: '2025-06-11', result: 'pass', numSamples: 8, numFail: 0, report: 'R07', note: '' },
+      { id: 'WI-2025-OLD-3', plant: 'NM Uông Bí', agency: 'Sở Y tế', date: '2025-05-20', result: 'pass', numSamples: 10, numFail: 0, report: 'R08', note: '' },
+    ],
+    upcoming: [
+      { id: 'WI-UP-003', plant: 'NM Uông Bí', agency: 'Sở Y tế Quảng Ninh', plannedDate: '2026-04-10', period: 'Quý 2/2026', note: 'Báo cáo giải trình sự cố 2025 kèm hồ sơ PCCC.' },
+      { id: 'WI-UP-001', plant: 'NM Hạ Long 1', agency: 'Trung tâm Y tế dự phòng Tỉnh', plannedDate: '2026-06-15', period: 'Bán niên 1/2026', note: 'Chuẩn bị đầy đủ sổ nhật ký xử lý.' },
+      { id: 'WI-UP-002', plant: 'NM Hạ Long 2', agency: 'Trung tâm Y tế dự phòng Tỉnh', plannedDate: '2026-06-16', period: 'Bán niên 1/2026', note: 'Duy trì đạt chuẩn để giảm tần suất kiểm định.' },
+      { id: 'WI-UP-004', plant: 'NM Hạ Long 1', agency: 'Cục ATTP – Bộ Y tế', plannedDate: '2026-09-20', period: 'Hàng năm 2026', note: 'Kiểm tra toàn diện cấp Bộ.' },
+    ],
+  },
+};
