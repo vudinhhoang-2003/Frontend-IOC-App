@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Moon, Droplets, History, LayoutDashboard, CheckCircle2, AlertTriangle, Zap } from 'lucide-react';
 import NrwKPIs from './components/NrwKPIs';
@@ -8,8 +8,9 @@ import LeakAlertsTab from './components/LeakAlertsTab';
 import NrwHistoryTab from './components/NrwHistoryTab';
 import FilterBar from '../../components/common/FilterBar';
 import { InspectionOrderModal, HistoryDetailModal } from './components/NrwModals';
-import { DMA_ZONES, MNF_DATA, LEAK_ALERTS, INSPECTION_HISTORY } from './mockData';
-import type { DMAZone, LeakAlert, InspectionOrder } from './types';
+import { MNF_DATA, LEAK_ALERTS, INSPECTION_HISTORY } from './mockData';
+import type { DMAZone, LeakAlert, InspectionOrder, MNFData } from './types';
+import { apiClient } from '../../services/apiClient';
 
 type NrwTab = 'overview' | 'mnf' | 'leaks' | 'history';
 
@@ -46,6 +47,10 @@ const NrwPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<NrwTab>('overview');
   const [toasts, setToasts] = useState<Toast[]>([]);
 
+  // API Data States
+  const [dmaZones, setDmaZones] = useState<DMAZone[]>([]);
+  const [activeMnfData, setActiveMnfData] = useState<MNFData | null>(null);
+
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [zoneFilter, setZoneFilter] = useState('all');
@@ -58,9 +63,36 @@ const NrwPage: React.FC = () => {
   const [selectedSource, setSelectedSource] = useState<DMAZone | LeakAlert | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<InspectionOrder | null>(null);
 
+  useEffect(() => {
+    fetchOverview();
+  }, []);
+
+  const fetchOverview = async () => {
+    try {
+      const res = await apiClient.get('/nrw/summary');
+      if (res.data?.success) {
+        const dmas = res.data.data.by_dma.map((item: any) => ({
+          id: item.dma_id,
+          name: item.dma_name,
+          district: item.dma_name,
+          supplyFlow: Number(item.total_supply_m3) || 0,
+          consumptionFlow: Number(item.total_consumption_m3) || 0,
+          loss: Number(item.avg_nrw_pct) || 0,
+          lossVolume: Number(item.total_nrw_m3) || 0,
+          status: item.status || 'ok',
+          customers: item.customer_count || 0,
+          lastUpdate: new Date().toLocaleString()
+        }));
+        setDmaZones(dmas);
+      }
+    } catch (error) {
+      console.error('Failed to fetch NRW summary:', error);
+    }
+  };
+
   // --- Filter Logic ---
   const filteredDmaZones = useMemo(() => {
-    return DMA_ZONES.filter(dma => {
+    return dmaZones.filter(dma => {
       const matchSearch = dma.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           dma.district.toLowerCase().includes(searchQuery.toLowerCase());
       const matchZone = zoneFilter === 'all' || dma.district === zoneFilter;
@@ -70,7 +102,7 @@ const NrwPage: React.FC = () => {
                         (lossFilter === 'ok' && dma.loss < 15);
       return matchSearch && matchZone && matchLoss;
     });
-  }, [searchQuery, zoneFilter, lossFilter]);
+  }, [dmaZones, searchQuery, zoneFilter, lossFilter]);
 
   const filteredLeakAlerts = useMemo(() => {
     return LEAK_ALERTS.filter(alert => {
@@ -82,14 +114,8 @@ const NrwPage: React.FC = () => {
   }, [searchQuery, zoneFilter]);
 
   const filteredMnfData = useMemo(() => {
-    return MNF_DATA.filter(mnf => {
-      const dma = DMA_ZONES.find(d => d.id === mnf.dmaId);
-      if (!dma) return false;
-      const matchSearch = dma.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchZone = zoneFilter === 'all' || dma.district === zoneFilter;
-      return matchSearch && matchZone;
-    });
-  }, [searchQuery, zoneFilter]);
+    return activeMnfData ? [activeMnfData] : [];
+  }, [activeMnfData]);
 
   const handleResetFilters = () => {
     setSearchQuery('');
@@ -99,8 +125,8 @@ const NrwPage: React.FC = () => {
   };
 
   const uniqueZones = useMemo(() => {
-    return Array.from(new Set(DMA_ZONES.map(dma => dma.district)));
-  }, []);
+    return Array.from(new Set(dmaZones.map(dma => dma.district)));
+  }, [dmaZones]);
 
   // --- Toast Actions ---
   const addToast = (message: string, type: Toast['type'] = 'info') => {
@@ -127,9 +153,29 @@ const NrwPage: React.FC = () => {
     setIsHistoryModalOpen(true);
   };
 
-  const handleAnalyzeMnf = (dma: DMAZone) => {
-    setActiveTab('mnf');
-    addToast(`Đang phân tích lưu lượng MNF cho ${dma.name}`, 'info');
+  const handleAnalyzeMnf = async (dma: DMAZone) => {
+    addToast(`Đang phân tích lưu lượng MNF cho ${dma.name}...`, 'info');
+    try {
+      const res = await apiClient.get(`/nrw/dma/${dma.id}/mnf`);
+      if (res.data?.success) {
+        const mnf = res.data.data;
+        setActiveMnfData({
+           dmaId: mnf.dma_id,
+           mnfHour: mnf.mnf_hour || '03:00',
+           mnfFlow: mnf.mnf_flow || 0,
+           leakEstimate: mnf.leak_estimate || 0,
+           leakPct: mnf.leak_pct || 0,
+           samples: mnf.samples?.map((s: any) => ({
+             hour: s.hour,
+             supply: s.supply,
+             consume: s.consume
+           })) || []
+        });
+        setActiveTab('mnf');
+      }
+    } catch (error) {
+      addToast(`Lỗi khi lấy dữ liệu MNF cho ${dma.name}`, 'error');
+    }
   };
 
   const tabs = [
