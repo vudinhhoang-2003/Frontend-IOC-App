@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { 
-  Users2, 
+import React, { useState, useRef } from 'react';
+import {
+  Users2,
   Receipt,
   Tractor,
   Download,
@@ -16,12 +16,19 @@ type TabType = 'customers' | 'billing' | 'metering';
 
 const CustomersPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('customers');
+  const customerListRef = useRef<{ openCreateModal: () => void }>(null);
 
   const tabs = [
     { id: 'customers', label: 'Khách hàng & HĐ', icon: Users2 },
     { id: 'billing', label: 'Hóa đơn & Thanh toán', icon: Receipt },
-    { id: 'metering', label: 'Ghi chỉ số đồng hồ', icon: Tractor }, // Changed icon to represent Metering
+    { id: 'metering', label: 'Ghi chỉ số đồng hồ', icon: Tractor },
   ];
+
+  const handleAddCustomer = () => {
+    setActiveTab('customers');
+    // Dispatch custom event for CustomerList to listen
+    window.dispatchEvent(new CustomEvent('open-create-customer'));
+  };
 
   return (
     <div className="p-6 h-full flex flex-col overflow-y-auto custom-scrollbar animate-fadeInScale">
@@ -40,7 +47,8 @@ const CustomersPage: React.FC = () => {
           <button className="btn btn-ghost btn-sm flex items-center gap-1.5 text-[color:var(--muted)] hover:text-[color:var(--text)]">
             <FileSpreadsheet size={14} /> Template
           </button>
-          <button className="btn btn-primary btn-sm flex items-center gap-1.5 shadow-[0_4px_16px_rgba(0,102,255,0.3)]">
+          <button onClick={handleAddCustomer}
+            className="btn btn-primary btn-sm flex items-center gap-1.5 shadow-[0_4px_16px_rgba(0,102,255,0.3)]">
             <UserPlus size={14} /> Thêm KH
           </button>
         </div>
@@ -55,8 +63,8 @@ const CustomersPage: React.FC = () => {
             <button
               key={tab.id}
               className={`flex items-center gap-2 px-4 py-2 rounded-t-lg transition-all font-bold text-[13px] whitespace-nowrap ${
-                isActive 
-                  ? 'bg-[color:var(--bg-hover)] text-[color:var(--cyan)] border-b-2 border-[color:var(--cyan)] shadow-[0_-4px_16px_rgba(0,200,255,0.05)]' 
+                isActive
+                  ? 'bg-[color:var(--bg-hover)] text-[color:var(--cyan)] border-b-2 border-[color:var(--cyan)] shadow-[0_-4px_16px_rgba(0,200,255,0.05)]'
                   : 'text-[color:var(--muted)] hover:bg-[color:var(--bg-hover)] hover:text-[color:var(--text)]'
               }`}
               onClick={() => setActiveTab(tab.id as TabType)}
