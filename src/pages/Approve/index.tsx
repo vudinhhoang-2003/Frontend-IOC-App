@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { PENDING_APPROVALS, APPROVAL_HISTORY, APPROVAL_SETTINGS } from './mockData';
+import React, { useState, useEffect } from 'react';
+import { APPROVAL_SETTINGS } from './mockData';
 import type { ApprovalRequest, ApprovalHistory } from './types';
+import { apiClient } from '../../services/apiClient';
 
 // Components
 import SummaryCards from './components/SummaryCards';
@@ -14,8 +15,63 @@ type TabType = 'pending' | 'history' | 'settings';
 
 const Approve: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('pending');
-  const [pendingRequests, setPendingRequests] = useState<ApprovalRequest[]>(PENDING_APPROVALS);
-  const [history, setHistory] = useState<ApprovalHistory[]>(APPROVAL_HISTORY);
+  const [pendingRequests, setPendingRequests] = useState<ApprovalRequest[]>([]);
+  const [history, setHistory] = useState<ApprovalHistory[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const fetchApprovals = async () => {
+    setLoading(true);
+    try {
+      const res = await apiClient.get('/approvals');
+      const data = res.data?.data || [];
+      
+      const mappedPending: ApprovalRequest[] = [];
+      const mappedHistory: ApprovalHistory[] = [];
+
+      data.forEach((item: any) => {
+        // Map backend ApprovalRead to Frontend format
+        if (item.status === 'pending') {
+          mappedPending.push({
+            id: item.id,
+            type: item.type || 'kpi_import',
+            urgency: item.urgency || 'med',
+            title: item.title,
+            desc: item.desc || '',
+            submitter: item.submitter || 'System',
+            submitterRole: item.submitter_role || 'Staff',
+            submitterAvatar: item.submitter_avatar || 'https://i.pravatar.cc/150?u=' + item.id,
+            submittedAt: item.submitted_at || item.created_at || new Date().toLocaleString(),
+            files: item.files || [],
+            note: item.note || '',
+            data: item.data || [],
+            status: 'pending'
+          });
+        } else {
+          mappedHistory.push({
+            id: item.id,
+            type: item.type || 'kpi_import',
+            title: item.title,
+            submitter: item.submitter || 'System',
+            approver: item.approver || 'Trần Phúc Hà (GĐ)',
+            approvedAt: item.approved_at || new Date().toLocaleString(),
+            status: item.status === 'approved' ? 'approved' : 'rejected',
+            note: item.note || item.rejection_reason || ''
+          });
+        }
+      });
+
+      setPendingRequests(mappedPending);
+      setHistory(mappedHistory);
+    } catch (error) {
+      console.error('Failed to fetch approvals:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchApprovals();
+  }, []);
 
   // Modal states
   const [selectedRequest, setSelectedRequest] = useState<ApprovalRequest | null>(null);
@@ -51,51 +107,36 @@ const Approve: React.FC = () => {
     setShowRejectModal(true);
   };
 
-  const handleConfirmReject = () => {
+  const handleConfirmReject = async () => {
     if (!rejectNote.trim()) {
       showToast('⚠ Vui lòng nhập lý do từ chối!');
       return;
     }
 
-    const req = pendingRequests.find(r => r.id === rejectId);
-    if (req) {
-      const newHistoryItem: ApprovalHistory = {
-        id: req.id,
-        type: req.type,
-        title: req.title,
-        submitter: req.submitter,
-        approver: 'Trần Phúc Hà (GĐ)', // Prototype style
-        approvedAt: new Date().toLocaleString(),
-        status: 'rejected',
-        note: rejectNote,
-      };
-
-      setHistory([newHistoryItem, ...history]);
-      setPendingRequests(pendingRequests.filter(r => r.id !== rejectId));
+    try {
+      await apiClient.post(`/approvals/${rejectId}/reject`, { rejection_reason: rejectNote });
       showToast('✕ Đã từ chối yêu cầu. Người gửi sẽ nhận thông báo.');
       setShowRejectModal(false);
       setSelectedRequest(null);
+      fetchApprovals();
+    } catch (e) {
+      showToast('⚠ Lỗi khi từ chối yêu cầu!');
     }
   };
 
-  const handleVerifyOtp = (code: string) => {
+  const handleVerifyOtp = async (code: string) => {
     if (selectedRequest && code === '123456') {
-      const newHistoryItem: ApprovalHistory = {
-        id: selectedRequest.id,
-        type: selectedRequest.type,
-        title: selectedRequest.title,
-        submitter: selectedRequest.submitter,
-        approver: 'Trần Phúc Hà (GĐ)', // Original style
-        approvedAt: new Date().toLocaleString(),
-        status: 'approved',
-        note: 'Đã phê duyệt thành công! Tác vụ đang được thực thi...',
-      };
-
-      setHistory([newHistoryItem, ...history]);
-      setPendingRequests(pendingRequests.filter(r => r.id !== selectedRequest.id));
-      showToast('✓ Đã phê duyệt thành công! Tác vụ đang được thực thi...');
-      setShowOtpModal(false);
-      setSelectedRequest(null);
+      try {
+        await apiClient.post(`/approvals/${selectedRequest.id}/approve`, { note: 'Phê duyệt từ Web IOC' });
+        showToast('✓ Đã phê duyệt thành công! Tác vụ đang được thực thi...');
+        setShowOtpModal(false);
+        setSelectedRequest(null);
+        fetchApprovals();
+      } catch (e) {
+        showToast('⚠ Lỗi khi phê duyệt!');
+      }
+    } else {
+        showToast('⚠ Mã OTP không chính xác!');
     }
   };
 

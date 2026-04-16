@@ -13,12 +13,12 @@ import {
   PieChart, Pie, Cell 
 } from 'recharts';
 import { 
-  MOCK_CALL_LOGS, MOCK_TICKETS, 
   AGENT_STATUSES, CALL_TRENDS 
 } from './mockCallData';
 import type { 
   CallTicket, CallCenterTab 
 } from './types';
+import { apiClient } from '../../services/apiClient';
 
 // --- Toast System ---
 interface Toast {
@@ -134,7 +134,33 @@ const CallCenterPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const itemsPerPage = 8;
+  const [logs, setLogs] = useState<any[]>([]);
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>({ total_calls: 0, resolved_calls: 0, open_tickets: 0, pending_tickets: 0, avg_duration: "0:00", csat: 0, top_topic: '', inbound_count: 0, outbound_count: 0 });
+  const [newTicketForm, setNewTicketForm] = useState({ title: '', category: 'Chất lượng nước', priority: 'medium', desc: '', customer: '', assignee: 'Trần Đình Dũng – Ban Điều hành' });
+  const [loading, setLoading] = useState(false);
 
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [stRes, lsRes, tkRes] = await Promise.all([
+        apiClient.get('/callcenter/stats').catch(() => ({ data: { data: {} } })),
+        apiClient.get('/callcenter/logs', { params: { limit: 100 } }).catch(() => ({ data: { data: [] } })),
+        apiClient.get('/callcenter/tickets', { params: { limit: 100 } }).catch(() => ({ data: { data: [] } }))
+      ]);
+      if (stRes.data?.data) setStats(stRes.data.data);
+      if (lsRes.data?.data) setLogs(lsRes.data.data);
+      if (tkRes.data?.data) setTickets(tkRes.data.data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   // Helpers
   const addToast = (message: string, type: Toast['type'] = 'info') => {
@@ -146,21 +172,65 @@ const CallCenterPage: React.FC = () => {
     setToasts(prev => prev.filter(t => t.id !== id));
   };
 
+  const handleUpdateTicket = async () => {
+    if (!selectedTicket) return;
+    try {
+      const newStatus = selectedTicket.status === 'open' ? 'inprogress' : 'closed';
+      await apiClient.patch(`/callcenter/tickets/${selectedTicket.id}`, {
+        status: newStatus,
+        timeline_entry: {
+          action: newStatus === 'inprogress' ? 'Đang xử lý' : 'Đóng Ticket',
+          time: new Date().toLocaleString('vi-VN', {hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'}),
+          user: 'Admin',
+          note: 'Cập nhật từ hệ thống'
+        }
+      });
+      addToast(`Đã chuyển trạng thái ${selectedTicket.id} thành ${newStatus}`, 'success');
+      setSelectedTicket(null);
+      fetchData();
+    } catch {
+      addToast('Cập nhật thất bại!', 'error');
+    }
+  };
+
+  const handleCreateTicket = async () => {
+    if (!newTicketForm.title) { addToast('Vui lòng nhập tiêu đề', 'error'); return; }
+    try {
+      setLoading(true);
+      const random_id = `TK-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${Math.floor(Math.random()*1000).toString().padStart(3,'0')}`;
+      await apiClient.post('/callcenter/tickets', {
+        id: random_id,
+        title: newTicketForm.title,
+        category: newTicketForm.category,
+        priority: newTicketForm.priority,
+        description: newTicketForm.desc,
+        assignee_dept: newTicketForm.assignee
+      });
+      addToast('Tạo Ticket thành công!', 'success');
+      setIsNewTicketOpen(false);
+      setNewTicketForm({ title: '', category: 'Chất lượng nước', priority: 'medium', desc: '', customer: '', assignee: 'Trần Đình Dũng – Ban Điều hành' });
+      fetchData();
+    } catch {
+       addToast('Lỗi khi tạo ticket', 'error');
+       setLoading(false);
+    }
+  };
+
   // Filtered Data
   const filteredLogs = useMemo(() => {
-    return MOCK_CALL_LOGS.filter(log => 
-      log.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      log.phone.includes(searchQuery) ||
-      log.topic.toLowerCase().includes(searchQuery.toLowerCase())
+    return logs.filter(log => 
+      (log.customer || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (log.phone || '').includes(searchQuery) ||
+      (log.topic || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, logs]);
 
   const filteredTickets = useMemo(() => {
-    return MOCK_TICKETS.filter(t => 
-      t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.id.toLowerCase().includes(searchQuery.toLowerCase())
+    return tickets.filter(t => 
+      (t.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (t.id || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, tickets]);
 
   // Pagination Logic
   const displayData = activeTab === 'calls' ? filteredLogs : filteredTickets;
@@ -255,21 +325,21 @@ const CallCenterPage: React.FC = () => {
 
       {/* KPI Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 relative z-10">
-        <KPICard label="Cuộc gọi hôm nay" value={MOCK_CALL_LOGS.length} accent="var(--cyan)" subtext="122 inbound · 63 outbound" trend={CALL_TRENDS.calls} />
-        <KPICard label="Tỷ lệ giải quyết" value="94.5%" accent="var(--green)" subtext="Đã xử lý 172/185 cuộc gọi" trend={CALL_TRENDS.resolved} />
+        <KPICard label="Cuộc gọi hôm nay" value={stats.total_calls} accent="var(--cyan)" subtext={`${stats.inbound_count} inbound · ${stats.outbound_count} outbound`} trend={CALL_TRENDS.calls} />
+        <KPICard label="Tỷ lệ giải quyết" value={`${stats.total_calls ? Math.round((stats.resolved_calls / stats.total_calls) * 100) : 0}%`} accent="var(--green)" subtext={`Đã xử lý ${stats.resolved_calls}/${stats.total_calls} cuộc gọi`} trend={CALL_TRENDS.resolved} />
         <KPICard 
           label="Phản ánh nhiều nhất" 
           value={
             <div className="flex flex-col gap-0.5">
-              <span className="text-[20px]">Hóa đơn tiền nước</span>
-              <span className="text-[color:var(--red)] text-[13px] font-bold flex items-center gap-1.5 uppercase tracking-wider"><Activity size={12} /> NM Hồng Gai</span>
+              <span className="text-[20px]">{stats.top_topic || "Chưa có dữ liệu"}</span>
+              <span className="text-[color:var(--red)] text-[13px] font-bold flex items-center gap-1.5 uppercase tracking-wider"><Activity size={12} /> Live Insights</span>
             </div>
           } 
-          accent="var(--red)" subtext="Hồng Gai chiếm 45% cuộc gọi" isSpecial={true} 
+          accent="var(--red)" subtext="Chủ đề nổi cộm hệ thống ghi nhận" isSpecial={true} 
         />
-        <KPICard label="Ticket mở mới" value={MOCK_TICKETS.filter(t => t.status !== 'closed').length} accent="var(--yellow)" subtext="12 đang xử lý · 32 hoàn thành" trend={CALL_TRENDS.tickets} />
-        <KPICard label="Thời gian đàm thoại TB" value="5:09" accent="var(--blue)" subtext="Dưới ngưỡng Target (6:00)" trend={CALL_TRENDS.duration} />
-        <KPICard label="Điểm hài lòng (CSAT)" value="4.4" accent="var(--purple)" subtext="Dựa trên 1,250 lượt đánh giá" trend={CALL_TRENDS.csat} />
+        <KPICard label="Ticket mở mới" value={stats.open_tickets} accent="var(--yellow)" subtext={`${stats.pending_tickets} đang xử lý`} trend={CALL_TRENDS.tickets} />
+        <KPICard label="Thời gian đàm thoại TB" value={stats.avg_duration || "0:00"} accent="var(--blue)" subtext="Mục tiêu (6:00)" trend={CALL_TRENDS.duration} />
+        <KPICard label="Điểm hài lòng (CSAT)" value={stats.csat ? stats.csat.toFixed(1) : "0.0"} accent="var(--purple)" subtext="Trung bình theo Rating" trend={CALL_TRENDS.csat} />
       </div>
 
       {/* Agent Status Bar */}
@@ -557,12 +627,14 @@ const CallCenterPage: React.FC = () => {
             </div>
             <div className="p-5 border-t border-[color:var(--border)] bg-[color:var(--bg-surface)] flex justify-end gap-3">
               <button onClick={() => setSelectedTicket(null)} className="btn btn-ghost px-6 rounded-xl font-bold">ĐÓNG</button>
-              <button 
-                onClick={() => addToast(`Cập nhật trạng thái cho ${selectedTicket.id}`, 'info')}
-                className="btn btn-primary px-8 rounded-xl font-black shadow-[0_8px_20px_var(--cyan)/20]"
-              >
-                CẬP NHẬT TIẾN ĐỘ
-              </button>
+              {selectedTicket.status !== 'closed' && (
+                <button 
+                  onClick={handleUpdateTicket}
+                  className="btn btn-primary px-8 rounded-xl font-black shadow-[0_8px_20px_var(--cyan)/20]"
+                >
+                  {selectedTicket.status === 'open' ? 'TIẾP NHẬN XỬ LÝ' : 'ĐÓNG TICKET'}
+                </button>
+              )}
             </div>
           </div>
         </div>,
@@ -581,13 +653,13 @@ const CallCenterPage: React.FC = () => {
               {/* Tiêu đề vấn đề */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] font-black text-[color:var(--muted)] uppercase tracking-wider pl-1">Tiêu đề vấn đề</label>
-                <input type="text" placeholder="Mô tả ngắn gọn..." className="bg-[color:var(--bg-surface)] border border-[color:var(--border)] rounded-xl p-3 text-[13.5px] text-[color:var(--text)] outline-none focus:border-[color:var(--cyan)] transition-all placeholder:text-[color:var(--muted)]/30" />
+                <input type="text" value={newTicketForm.title} onChange={e => setNewTicketForm({...newTicketForm, title: e.target.value})} placeholder="Mô tả ngắn gọn..." className="bg-[color:var(--bg-surface)] border border-[color:var(--border)] rounded-xl p-3 text-[13.5px] text-[color:var(--text)] outline-none focus:border-[color:var(--cyan)] transition-all placeholder:text-[color:var(--muted)]/30" />
               </div>
               {/* Danh mục + Mức ưu tiên */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-black text-[color:var(--muted)] uppercase tracking-wider pl-1">Danh mục</label>
-                  <select className="bg-[color:var(--bg-surface)] border border-[color:var(--border)] rounded-xl p-3 text-[13.5px] text-[color:var(--text)] outline-none focus:border-[color:var(--cyan)] transition-all">
+                  <select value={newTicketForm.category} onChange={e => setNewTicketForm({...newTicketForm, category: e.target.value})} className="bg-[color:var(--bg-surface)] border border-[color:var(--border)] rounded-xl p-3 text-[13.5px] text-[color:var(--text)] outline-none focus:border-[color:var(--cyan)] transition-all">
                     <option>Chất lượng nước</option>
                     <option>Hóa đơn &amp; Thanh toán</option>
                     <option>Sự cố mạng lưới</option>
@@ -598,11 +670,11 @@ const CallCenterPage: React.FC = () => {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-black text-[color:var(--muted)] uppercase tracking-wider pl-1">Mức ưu tiên</label>
-                  <select className="bg-[color:var(--bg-surface)] border border-[color:var(--border)] rounded-xl p-3 text-[13.5px] text-[color:var(--text)] outline-none focus:border-[color:var(--cyan)] transition-all">
-                    <option>Thường</option>
-                    <option>Trung bình</option>
-                    <option>Cao</option>
-                    <option>Khẩn cấp</option>
+                  <select value={newTicketForm.priority} onChange={e => setNewTicketForm({...newTicketForm, priority: e.target.value})} className="bg-[color:var(--bg-surface)] border border-[color:var(--border)] rounded-xl p-3 text-[13.5px] text-[color:var(--text)] outline-none focus:border-[color:var(--cyan)] transition-all">
+                    <option value="low">Thường</option>
+                    <option value="medium">Trung bình</option>
+                    <option value="high">Cao</option>
+                    <option value="critical">Khẩn cấp</option>
                   </select>
                 </div>
               </div>
@@ -610,11 +682,11 @@ const CallCenterPage: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-black text-[color:var(--muted)] uppercase tracking-wider pl-1">Khách hàng liên quan</label>
-                  <input type="text" placeholder="Mã KH hoặc tên..." className="bg-[color:var(--bg-surface)] border border-[color:var(--border)] rounded-xl p-3 text-[13.5px] text-[color:var(--text)] outline-none focus:border-[color:var(--cyan)] transition-all placeholder:text-[color:var(--muted)]/30" />
+                  <input value={newTicketForm.customer} onChange={e => setNewTicketForm({...newTicketForm, customer: e.target.value})} type="text" placeholder="Mã KH hoặc tên..." className="bg-[color:var(--bg-surface)] border border-[color:var(--border)] rounded-xl p-3 text-[13.5px] text-[color:var(--text)] outline-none focus:border-[color:var(--cyan)] transition-all placeholder:text-[color:var(--muted)]/30" />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-black text-[color:var(--muted)] uppercase tracking-wider pl-1">Phân công</label>
-                  <select className="bg-[color:var(--bg-surface)] border border-[color:var(--border)] rounded-xl p-3 text-[13.5px] text-[color:var(--text)] outline-none focus:border-[color:var(--cyan)] transition-all">
+                  <select value={newTicketForm.assignee} onChange={e => setNewTicketForm({...newTicketForm, assignee: e.target.value})} className="bg-[color:var(--bg-surface)] border border-[color:var(--border)] rounded-xl p-3 text-[13.5px] text-[color:var(--text)] outline-none focus:border-[color:var(--cyan)] transition-all">
                     <option>Trần Đình Dũng – Ban Điều hành</option>
                     <option>Nguyễn Văn An – Kỹ thuật</option>
                     <option>Lê Thị Hoa – CSKH</option>
@@ -625,19 +697,17 @@ const CallCenterPage: React.FC = () => {
               {/* Mô tả chi tiết */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] font-black text-[color:var(--muted)] uppercase tracking-wider pl-1">Mô tả chi tiết</label>
-                <textarea rows={4} placeholder="Ghi chép nội dung cuộc gọi..." className="bg-[color:var(--bg-surface)] border border-[color:var(--border)] rounded-xl p-3 text-[13.5px] text-[color:var(--text)] outline-none focus:border-[color:var(--cyan)] transition-all placeholder:text-[color:var(--muted)]/30 resize-none"></textarea>
+                <textarea rows={4} value={newTicketForm.desc} onChange={e => setNewTicketForm({...newTicketForm, desc: e.target.value})} placeholder="Ghi chép nội dung cuộc gọi..." className="bg-[color:var(--bg-surface)] border border-[color:var(--border)] rounded-xl p-3 text-[13.5px] text-[color:var(--text)] outline-none focus:border-[color:var(--cyan)] transition-all placeholder:text-[color:var(--muted)]/30 resize-none"></textarea>
               </div>
             </div>
             <div className="p-6 border-t border-[color:var(--border)] bg-[color:var(--bg-surface)] flex justify-end gap-3">
               <button onClick={() => setIsNewTicketOpen(false)} className="btn btn-ghost px-6 rounded-xl font-bold">Hủy</button>
               <button 
-                onClick={() => {
-                  addToast('Tạo Ticket thành công!', 'success');
-                  setIsNewTicketOpen(false);
-                }}
+                onClick={handleCreateTicket}
+                disabled={loading}
                 className="btn btn-primary px-8 rounded-xl font-black shadow-[0_8px_25px_var(--cyan)/20] active:scale-95 transition-all text-[13.5px]"
               >
-                Tạo ticket
+                {loading ? 'Đang tạo...' : 'Tạo ticket'}
               </button>
             </div>
           </div>
