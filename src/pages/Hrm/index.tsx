@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   CalendarDays, 
@@ -9,15 +9,8 @@ import {
   UserPlus,
   History
 } from 'lucide-react';
-import { 
-  mockEmployees, 
-  mockShifts, 
-  mockAttendanceSchedule, 
-  mockEmployeeKpi, 
-  mockOrgStructure, 
-  mockDeptList,
-  mockChangeHistory
-} from './data';
+
+import { apiClient } from '../../services/apiClient';
 
 // Sub-components
 import EmployeeList from './views/EmployeeList';
@@ -32,15 +25,56 @@ type TabType = 'employees' | 'attendance' | 'kpi' | 'orgchart' | 'departments' |
 const Hrm: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('employees');
   
+  // API States
+  const [stats, setStats] = useState<any>({ total_employees: 0, active_employees: 0, avg_kpi_score: 0, on_leave: 0 });
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [shifts, setShifts] = useState<any[]>([]);
+  const [attendance, setAttendance] = useState<any>({});
+  const [kpis, setKpis] = useState<any[]>([]);
+  const [orgStructure, setOrgStructure] = useState<any>(null);
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [history, setHistory] = useState<any[]>([]);
+
   // State for EmployeeList
   const [empPage, setEmpPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Calculate KPIs
-  const totalEmployees = mockEmployees.length;
-  const activeEmployees = mockEmployees.filter(e => e.status === 'active').length;
-  const avgAge = Math.round(mockEmployees.reduce((acc, e) => acc + (e.age || 0), 0) / totalEmployees);
-  const avgExp = (mockEmployees.reduce((acc, e) => acc + (e.exp || 0), 0) / totalEmployees).toFixed(1);
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [_stats, _emps, _shifts, _att, _kpis, _org, _depts, _hist] = await Promise.all([
+        apiClient.get('/hrm/stats'),
+        apiClient.get('/hrm/employees?limit=200'),
+        apiClient.get('/hrm/shifts'),
+        apiClient.get('/hrm/attendance?year=2026&month=2'),
+        apiClient.get('/hrm/kpi?limit=200'),
+        apiClient.get('/hrm/orgchart'),
+        apiClient.get('/hrm/departments'),
+        apiClient.get('/hrm/history')
+      ]);
+
+      if (_stats.data?.success) setStats(_stats.data.data);
+      if (_emps.data?.success) setEmployees(_emps.data.data);
+      if (_shifts.data?.success) setShifts(_shifts.data.data);
+      if (_att.data?.success) setAttendance(_att.data.data.schedule);
+      if (_kpis.data?.success) setKpis(_kpis.data.data);
+      if (_org.data?.success) setOrgStructure(_org.data.data);
+      if (_depts.data?.success) setDepartments(_depts.data.data);
+      if (_hist.data?.success) setHistory(_hist.data.data);
+    } catch (e) {
+      console.error('Error fetching HRM data', e);
+    }
+  };
+
+  // Calculate KPIs (local fallback logic if needed)
+  const totalEmployees = stats.total_employees || employees.length || 0;
+  const activeEmployees = stats.active_employees || employees.filter(e => e.status === 'active').length || 0;
+  const avgAge = employees.length ? Math.round(employees.reduce((acc, e) => acc + (e.age || 0), 0) / employees.length) : 0;
+  const avgExp = employees.length ? (employees.reduce((acc, e) => acc + (e.exp || 0), 0) / employees.length).toFixed(1) : '0.0';
+  const avgKpi = stats.avg_kpi_score || 0;
 
   // Tab definitions
   const tabs = [
@@ -110,7 +144,7 @@ const Hrm: React.FC = () => {
         <div className="kpi-card !min-h-[100px] !p-4" style={{ '--accent-color': 'var(--green)' } as any}>
           <div className="kpi-label mb-1">KPI TB tháng 2</div>
           <div className="kpi-value text-2xl text-[color:var(--green)]">
-            92<span className="text-base text-[color:var(--muted)] ml-0.5">%</span>
+            {avgKpi}<span className="text-base text-[color:var(--muted)] ml-0.5">%</span>
           </div>
         </div>
       </div>
@@ -154,7 +188,7 @@ const Hrm: React.FC = () => {
               />
             </div>
             <EmployeeList 
-              employees={mockEmployees} 
+              employees={employees} 
               page={empPage} 
               setPage={setEmpPage}
               searchQuery={searchQuery}
@@ -169,9 +203,9 @@ const Hrm: React.FC = () => {
         {activeTab === 'attendance' && (
           <div className="animate-fadeInScale">
             <Attendance 
-              employees={mockEmployees} 
-              shifts={mockShifts} 
-              attendanceSchedule={mockAttendanceSchedule} 
+              employees={employees} 
+              shifts={shifts} 
+              attendanceSchedule={attendance} 
             />
           </div>
         )}
@@ -179,8 +213,8 @@ const Hrm: React.FC = () => {
         {activeTab === 'kpi' && (
           <div className="animate-fadeInScale">
             <KpiBoard 
-              employees={mockEmployees} 
-              employeeKpi={mockEmployeeKpi} 
+              employees={employees} 
+              employeeKpi={kpis} 
             />
           </div>
         )}
@@ -188,8 +222,8 @@ const Hrm: React.FC = () => {
         {activeTab === 'orgchart' && (
           <div className="animate-fadeInScale">
             <OrgChart 
-              employees={mockEmployees} 
-              orgStructure={mockOrgStructure} 
+              employees={employees} 
+              orgStructure={orgStructure} 
             />
           </div>
         )}
@@ -197,7 +231,7 @@ const Hrm: React.FC = () => {
         {activeTab === 'departments' && (
           <div className="animate-fadeInScale">
             <Departments 
-              departments={mockDeptList} 
+              departments={departments} 
               onAddDept={() => alert('Mo popup thêm phòng ban')}
               onEditDept={(id) => alert(`Sửa phòng ban: ${id}`)}
               onDeleteDept={(id, name) => alert(`Xóa phòng ban: ${name}`)}
@@ -207,7 +241,7 @@ const Hrm: React.FC = () => {
 
         {activeTab === 'history' && (
           <div className="animate-fadeInScale">
-            <ChangeHistory history={mockChangeHistory} />
+            <ChangeHistory history={history} />
           </div>
         )}
       </div>
