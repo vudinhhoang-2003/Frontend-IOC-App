@@ -48,14 +48,14 @@ const NrwHistoryTab: React.FC<Props> = ({ history, onViewDetail }) => {
               {currentItems.map((h) => (
                 <tr key={h.id} className="hover:bg-white/5 transition-all group">
                   <td className="py-3 px-3.5 font-mono text-[12px] font-bold text-[var(--cyan)] selection:bg-[var(--cyan)]/20 uppercase">{h.id}</td>
-                  <td className="py-3 px-3.5 text-[12px] text-[var(--text)] font-medium text-left">{h.date}</td>
-                  <td className="py-3 px-3.5 text-[13px] font-bold text-[var(--text)] text-left">{h.dmaName}</td>
+                  <td className="py-3 px-3.5 text-[12px] text-[var(--text)] font-medium text-left">{h.date || (h as any).created_at?.slice(0,10)}</td>
+                  <td className="py-3 px-3.5 text-[13px] font-bold text-[var(--text)] text-left">{h.dmaName || (h as any).dma_name || h.id}</td>
                   <td className="py-3 px-3.5">
                     <div className="text-[12px] font-medium text-[var(--muted)] line-clamp-1 max-w-[180px]" title={h.suspect}>{h.suspect}</div>
                   </td>
                   <td className="py-3 px-3.5">
                     <div className="text-[12px] font-bold text-[var(--cyan)] hover:border-b hover:border-dashed hover:border-[var(--cyan)] transition-all cursor-pointer inline-block whitespace-nowrap">
-                      {h.responsibleName}
+                      {h.responsibleName || (h as any).responsible_name || 'Nhân viên Điều hành'}
                     </div>
                   </td>
                   <td className="py-3 px-3.5 text-center">

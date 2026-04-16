@@ -42,12 +42,17 @@ export interface LeakAlert {
 export interface InspectionOrder {
   id: string;
   date: string;
-  dmaName: string;
+  // Support both camelCase (mock) and snake_case (API)
+  dmaName?: string;
+  dma_name?: string;
   suspect: string;
   team: string;
   action: string;
   recovered: number;
   status: 'processing' | 'done';
-  responsibleId: string;
-  responsibleName: string;
+  responsibleId?: string;
+  responsibleName?: string;
+  responsible_id?: string;
+  responsible_name?: string;
+  created_at?: string;
 }

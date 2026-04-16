@@ -1,14 +1,15 @@
 import React from 'react';
-import { AlertTriangle, Clock, MapPin, Search, Map, Zap, FileText } from 'lucide-react';
+import { AlertTriangle, Clock, MapPin, Search, Map, FileText, CheckCircle2 } from 'lucide-react';
 import type { LeakAlert } from '../types';
 
 interface Props {
   alerts: LeakAlert[];
+  handledAlerts?: string[];
   onViewGis: (alert: LeakAlert) => void;
   onCreateOrder: (alert: LeakAlert) => void;
 }
 
-const LeakAlertsTab: React.FC<Props> = ({ alerts, onViewGis, onCreateOrder }) => {
+const LeakAlertsTab: React.FC<Props> = ({ alerts, handledAlerts = [], onViewGis, onCreateOrder }) => {
   return (
     <div className="flex flex-col gap-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Risk Banner - Exact Prototype Style */}
@@ -85,12 +86,21 @@ const LeakAlertsTab: React.FC<Props> = ({ alerts, onViewGis, onCreateOrder }) =>
               >
                 <Map size={14} /> Xem trên GIS
               </button>
-              <button 
-                onClick={() => onCreateOrder(alert)}
-                className="flex-1 flex justify-center items-center gap-2 py-2.5 rounded-full bg-gradient-to-r from-[var(--blue)] to-[var(--cyan)] text-white text-[13px] font-black hover:brightness-110 transition-all shadow-lg shadow-blue-500/20 border border-blue-400/20"
-              >
-                <FileText size={14} /> Tạo lệnh kiểm tra
-              </button>
+              {handledAlerts.includes(alert.id) ? (
+                <button
+                  disabled
+                  className="flex-1 flex justify-center items-center gap-2 py-2.5 rounded-full bg-[var(--bg-hover)] text-[var(--muted)] text-[13px] font-bold opacity-60 cursor-not-allowed border border-[var(--border)]"
+                >
+                  <CheckCircle2 size={14} /> Đã phát lệnh
+                </button>
+              ) : (
+                <button 
+                  onClick={() => onCreateOrder(alert)}
+                  className="flex-1 flex justify-center items-center gap-2 py-2.5 rounded-full bg-gradient-to-r from-[var(--blue)] to-[var(--cyan)] text-white text-[13px] font-black hover:brightness-110 transition-all shadow-lg shadow-blue-500/20 border border-blue-400/20"
+                >
+                  <FileText size={14} /> Tạo lệnh kiểm tra
+                </button>
+              )}
             </div>
           </div>
         ))}

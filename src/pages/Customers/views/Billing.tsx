@@ -242,13 +242,14 @@ const Billing: React.FC = () => {
                   {i.status === 'paid' && <span className="badge badge-green text-[10px]">Đã thu</span>}
                   {i.status === 'partial' && <span className="badge badge-yellow text-[10px]">Một phần</span>}
                   {i.status === 'unpaid' && <span className="badge badge-red text-[10px]">Chưa thu</span>}
+                  {i.status === 'cancelled' && <span className="badge badge-gray text-[10px]">Đã hủy</span>}
                 </td>
                 <td className="p-4 font-mono text-[11px] text-[color:var(--muted)]">{i.issued}</td>
                 <td className={`p-4 font-mono text-[11px] ${i.paidDate !== '—' ? 'text-[color:var(--green)]' : 'text-[color:var(--muted)]'}`}>{i.paidDate}</td>
                 <td className="p-4 text-[11px] text-[color:var(--muted)]">{i.method}</td>
                 <td className="p-4 text-right">
                   <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {i.status !== 'paid' && (
+                    {i.status !== 'paid' && i.status !== 'cancelled' && (
                       <button onClick={() => setPayInvoice(i)} className="p-1.5 rounded-md hover:bg-[color:var(--bg-hover)] text-[color:var(--green)]" title="Thanh toán"><CreditCard size={14} /></button>
                     )}
                     {(i.status === 'unpaid') && (

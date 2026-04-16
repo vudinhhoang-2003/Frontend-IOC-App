@@ -7,7 +7,7 @@ import MnfAnalysisTab from './components/MnfAnalysisTab';
 import LeakAlertsTab from './components/LeakAlertsTab';
 import NrwHistoryTab from './components/NrwHistoryTab';
 import FilterBar from '../../components/common/FilterBar';
-import { InspectionOrderModal, HistoryDetailModal } from './components/NrwModals';
+import { InspectionOrderModal, HistoryDetailModal, CreateDMAModal } from './components/NrwModals';
 import { MNF_DATA, LEAK_ALERTS, INSPECTION_HISTORY } from './mockData';
 import type { DMAZone, LeakAlert, InspectionOrder, MNFData } from './types';
 import { apiClient } from '../../services/apiClient';
@@ -60,12 +60,27 @@ const NrwPage: React.FC = () => {
   // Modal states
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedSource, setSelectedSource] = useState<DMAZone | LeakAlert | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<InspectionOrder | null>(null);
+  const [handledAlerts, setHandledAlerts] = useState<string[]>([]);
+  const [inspectionHistory, setInspectionHistory] = useState<InspectionOrder[]>([]);
 
   useEffect(() => {
     fetchOverview();
-  }, []);
+    fetchInspectionHistory();
+  }, [timeFilter]);
+
+  const fetchInspectionHistory = async () => {
+    try {
+      const res = await apiClient.get('/nrw/inspections');
+      if (res.data?.success) {
+        setInspectionHistory(res.data.data);
+      }
+    } catch (e) {
+      console.error('Failed to fetch inspection orders:', e);
+    }
+  };
 
   const fetchOverview = async () => {
     try {
@@ -114,7 +129,7 @@ const NrwPage: React.FC = () => {
   }, [searchQuery, zoneFilter]);
 
   const filteredMnfData = useMemo(() => {
-    return activeMnfData ? [activeMnfData] : [];
+    return activeMnfData ? [activeMnfData] : MNF_DATA;
   }, [activeMnfData]);
 
   const handleResetFilters = () => {
@@ -143,9 +158,25 @@ const NrwPage: React.FC = () => {
     setIsOrderModalOpen(true);
   };
 
-  const handleSaveOrder = () => {
-    setIsOrderModalOpen(false);
-    addToast('Đã phát lệnh kiểm tra NRW thành công', 'success');
+  const handleSaveOrder = async (payload: any) => {
+    try {
+      await apiClient.post('/nrw/inspections', payload);
+      setIsOrderModalOpen(false);
+      addToast('Đã phát lệnh kiểm tra NRW thành công', 'success');
+      fetchInspectionHistory(); // Reload table
+      
+      // Mark alert as handled so it changes button to 'Đã phát lệnh'
+      if (selectedSource && 'id' in selectedSource) {
+        setHandledAlerts(prev => [...prev, selectedSource.id]);
+      } else if (selectedSource && 'zone' in selectedSource) {
+        // Just in case selected source is DMA
+        setHandledAlerts(prev => [...prev, (selectedSource as any).id || (selectedSource as any).dmaId]);
+      }
+    } catch (error: any) {
+      console.error('Inspection order error:', error?.response?.data || error?.message || error);
+      const msg = error?.response?.data?.detail || error?.response?.data?.message || 'Lỗi khi phát lệnh kiểm tra';
+      addToast(msg, 'error');
+    }
   };
 
   const handleViewHistory = (order: InspectionOrder) => {
@@ -203,7 +234,7 @@ const NrwPage: React.FC = () => {
         <div className="page-actions">
           <button 
             className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[var(--blue)] to-[var(--cyan)] text-white rounded-full text-[13.5px] font-bold shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all hover:brightness-110"
-            onClick={() => addToast('Tính năng đang được phát triển', 'info')}
+            onClick={() => setIsCreateModalOpen(true)}
           >
             <Plus size={16} strokeWidth={3} /> Thêm DMA mới
           </button>
@@ -291,6 +322,7 @@ const NrwPage: React.FC = () => {
         {activeTab === 'leaks' && (
           <LeakAlertsTab 
             alerts={filteredLeakAlerts} 
+            handledAlerts={handledAlerts}
             onViewGis={(alert) => {
               addToast(`Mở GIS tại vị trí: ${alert.zone}...`, 'info');
               setTimeout(() => navigate(`/gis?dmaId=${alert.dmaId}`), 1000);
@@ -300,24 +332,16 @@ const NrwPage: React.FC = () => {
         )}
         {activeTab === 'history' && (
           <NrwHistoryTab 
-            history={INSPECTION_HISTORY} 
+            history={inspectionHistory} 
             onViewDetail={handleViewHistory} 
           />
         )}
       </div>
 
       {/* Modals */}
-      <InspectionOrderModal 
-        isOpen={isOrderModalOpen} 
-        onClose={() => setIsOrderModalOpen(false)} 
-        onSave={handleSaveOrder} 
-        source={selectedSource} 
-      />
-      <HistoryDetailModal 
-        isOpen={isHistoryModalOpen} 
-        onClose={() => setIsHistoryModalOpen(false)} 
-        order={selectedOrder} 
-      />
+      <InspectionOrderModal isOpen={isOrderModalOpen} onClose={() => setIsOrderModalOpen(false)} onSave={handleSaveOrder} source={selectedSource} />
+      <HistoryDetailModal isOpen={isHistoryModalOpen} onClose={() => setIsHistoryModalOpen(false)} order={selectedOrder} />
+      <CreateDMAModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onDone={() => { fetchOverview(); addToast('Đã tạo phân vùng DMA thành công!', 'success'); }} />
     </div>
   );
 };
