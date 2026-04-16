@@ -231,14 +231,6 @@ const NrwPage: React.FC = () => {
             Phân tích chỉ số MNF và quản lý các kịch bản giảm thất thoát nước mạng lưới
           </p>
         </div>
-        <div className="page-actions">
-          <button 
-            className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[var(--blue)] to-[var(--cyan)] text-white rounded-full text-[13.5px] font-bold shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all hover:brightness-110"
-            onClick={() => setIsCreateModalOpen(true)}
-          >
-            <Plus size={16} strokeWidth={3} /> Thêm DMA mới
-          </button>
-        </div>
       </div>
 
       {/* Filter Bar Section — Standardized Component */}
